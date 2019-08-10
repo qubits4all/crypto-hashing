@@ -11,6 +11,7 @@
     <properties>
         <java.se.release.version>11</java.se.release.version>
 
+        <javax.validation.version>2.0.1.Final</javax.validation.version>
         <org.apache.commons.codec.version>1.12</org.apache.commons.codec.version>
         <org.apache.commons.crypto.version>1.0.0</org.apache.commons.crypto.version>
 
@@ -19,6 +20,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${javax.validation.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
