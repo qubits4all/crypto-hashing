@@ -5,6 +5,6 @@
 CREATE TABLE IF NOT EXISTS secure_hashing.used_distinct_hashes
 (
     used_hash       varchar(97)     NOT NULL, -- salted SHA-256 hash hex. encoded [salt:saltedHash]
-    created_at      timestamp,
+    created_at      timestamp       NOT NULL    DEFAULT now(),
     CONSTRAINT used_distinct_hashes_pk  PRIMARY KEY (used_hash)
 );
