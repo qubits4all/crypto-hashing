@@ -8,18 +8,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.springframework.lang.Nullable;
 
 import static info.willdspann.crypto.hashing.ReproducibleSeedGenerator.NULL_STRING_MARKER;
 
 public final class ReproducibleSaltGenerator {
     private static final String DRBG_ALGORITHM = "DRBG";
-    private static final int DEFAULT_SALT_LENGTH = 16;  // bytes
+    private static final int DEFAULT_SALT_LENGTH = 16;     // bytes
+    private static final int DRBG_SECURITY_STRENGTH = 128; // highest security strength (should be >= the largest random value requested at a time)
 
     private ReproducibleSaltGenerator() { }
 
-    public static byte[] generateSaltForValue(final byte[] associatedBytes, final byte[] secretSeed, int saltIndex) {
+    public static byte[] generateSaltForValue(@NotNull final byte[] associatedBytes, @NotNull final byte[] secretSeed, int saltIndex) {
         assert saltIndex >= 0;
 
         final Iterator<byte[]> saltIter = iteratorForValue(associatedBytes, secretSeed);
@@ -31,8 +35,8 @@ public final class ReproducibleSaltGenerator {
         return salt;
     }
 
-    public static String generateSaltForValue(final String associatedValue,
-                                              final String secretSeedHex,
+    public static String generateSaltForValue(@Nullable final String associatedValue,
+                                              @NotNull final String secretSeedHex,
                                               int saltIndex) throws DecoderException {
         assert saltIndex >= 0;
 
@@ -53,8 +57,8 @@ public final class ReproducibleSaltGenerator {
      * @param count
      * @return
      */
-    public static List<byte[]> generateSaltsForValue(final byte[] associatedBytes,
-                                                     final byte[] secretSeedBytes,
+    public static List<byte[]> generateSaltsForValue(@NotNull final byte[] associatedBytes,
+                                                     @NotNull final byte[] secretSeedBytes,
                                                      int count) {
         assert count > 0;
 
@@ -77,8 +81,8 @@ public final class ReproducibleSaltGenerator {
      * @return
      * @throws DecoderException
      */
-    public static List<String> generateSaltsForValue(final String associatedValue,
-                                                     final String secretSeedHex,
+    public static List<String> generateSaltsForValue(@Nullable final String associatedValue,
+                                                     @NotNull final String secretSeedHex,
                                                      int count) throws DecoderException {
         assert count > 0;
 
@@ -91,14 +95,14 @@ public final class ReproducibleSaltGenerator {
         return salts;
     }
 
-    public static Iterator<byte[]> iteratorForValue(final byte[] associatedBytes, final byte[] secretSeedBytes) {
+    public static Iterator<byte[]> iteratorForValue(@NotNull final byte[] associatedBytes, @NotNull final byte[] secretSeedBytes) {
         final SecureRandom drbg = initDRBG();
         final byte[] associatedSeed = ReproducibleSeedGenerator.generateSeedForValue(associatedBytes, secretSeedBytes);
 
         return new SaltIterator(drbg, associatedSeed);
     }
 
-    public static Iterator<String> iteratorForValue(final String associatedValue, final String secretSeedHex) throws DecoderException {
+    public static Iterator<String> iteratorForValue(@Nullable final String associatedValue, @NotNull final String secretSeedHex) throws DecoderException {
         final SecureRandom drbg = initDRBG();
 
         byte[] associatedBytes;
@@ -119,8 +123,8 @@ public final class ReproducibleSaltGenerator {
         try {
             drbg = SecureRandom.getInstance("DRBG",
                     DrbgParameters.instantiation(
-                            256,
-                            DrbgParameters.Capability.RESEED_ONLY,
+                            DRBG_SECURITY_STRENGTH,
+                            DrbgParameters.Capability.NONE,
                             null)
             );
         } catch (NoSuchAlgorithmException nsae) {
@@ -134,11 +138,11 @@ public final class ReproducibleSaltGenerator {
     private static class HexSaltIterator implements Iterator<String> {
         private SaltIterator iter;
 
-        private HexSaltIterator(final SecureRandom drbg, final byte[] associatedSeed) {
+        private HexSaltIterator(@NotNull final SecureRandom drbg, @NotNull final byte[] associatedSeed) {
             this.iter = new SaltIterator(drbg, associatedSeed);
         }
 
-        private HexSaltIterator(final SaltIterator saltIterator) {
+        private HexSaltIterator(@NotNull final SaltIterator saltIterator) {
             this.iter = saltIterator;
         }
 
@@ -170,7 +174,7 @@ public final class ReproducibleSaltGenerator {
          *                       {@code ReproducibleSeedGenerator} from a common secret seed and the associated data
          *                       value for which salts will be generated.
          */
-        private SaltIterator(final SecureRandom drbg, final byte[] associatedSeed) {
+        private SaltIterator(@NotNull final SecureRandom drbg, @NotNull final byte[] associatedSeed) {
             this.drbg = drbg;
             this.drbg.setSeed(associatedSeed);
         }

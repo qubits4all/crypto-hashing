@@ -10,6 +10,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.lang.Nullable;
 
+import info.willdspann.crypto.util.MemoryUtils;
 import info.willdspann.crypto.valueobjects.SaltedHash;
 
 public final class HashingUtils {
@@ -39,11 +40,9 @@ public final class HashingUtils {
      * @return
      */
     public static SaltedHash saltedHash(@NotNull final byte[] cleartextBytes, @NotNull final byte[] saltBytes) {
-        final byte[] buffer = new byte[cleartextBytes.length + saltBytes.length];
-        System.arraycopy(cleartextBytes, 0, buffer, 0, cleartextBytes.length);
-        System.arraycopy(saltBytes, 0, buffer, cleartextBytes.length, saltBytes.length);
-
+        final byte[] buffer = MemoryUtils.concatenateBuffers(cleartextBytes, saltBytes);
         final byte[] saltedHash = DigestUtils.sha256(buffer);
+        MemoryUtils.clearBuffer(buffer);
 
         return new SaltedHash(saltedHash, saltBytes);
     }
