@@ -1,4 +1,3 @@
-\connect security_store;
 --
 -- Create schema for grouping tables related to secure hashing.
 --

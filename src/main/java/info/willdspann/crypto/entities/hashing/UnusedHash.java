@@ -9,25 +9,33 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "secure_hashing.hash_orphans_graveyard")
-public class HashOrphan {
+@Table(name = "secure_hashing.hash_graveyard")
+public class UnusedHash {
 
     @Id
     @NotNull
     @Size(min = 64, max = 97)
-    private String orphanedHash;
+    private String unusedHash;
 
     @NotNull
     private Timestamp createdAt;
 
     /** No-argument constructor needed by JPA. */
-    HashOrphan() { }
+    UnusedHash() { }
 
-    public String getOrphanedHash() {
-        return orphanedHash;
+    public String getUnusedHash() {
+        return unusedHash;
+    }
+
+    public void setUnusedHash(String unusedHash) {
+        this.unusedHash = unusedHash;
     }
 
     public Timestamp getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
