@@ -3,13 +3,18 @@ package info.willdspann.crypto.hashing;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import javax.security.auth.Destroyable;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.data.util.StreamUtils;
+
 import info.willdspann.crypto.util.MemoryUtils;
 import info.willdspann.crypto.util.hashing.HashingUtils;
 import info.willdspann.crypto.valueobjects.SaltedHash;
+
+import static java.util.stream.Collectors.toSet;
 
 public class SaltedHashGenerator implements Destroyable {
     private final byte[] secretSeed;
@@ -26,6 +31,32 @@ public class SaltedHashGenerator implements Destroyable {
         else {
             throw new IllegalStateException(
                     "Unable to create salted hash iterator -- Secret seed has been cleared with destroy()."
+            );
+        }
+    }
+
+    public SaltedHash getNthSaltedHash(@NotNull final byte[] cleartextBytes, int saltIndex) {
+        if (!destroyed) {
+            final byte[] salt = ReproducibleSaltGenerator.generateSaltForValue(cleartextBytes, secretSeed, saltIndex);
+            return HashingUtils.saltedHash(cleartextBytes, salt);
+        }
+        else {
+            throw new IllegalStateException(
+                    "Unable to create salted hash -- Secret seed has been cleared with destroy()."
+            );
+        }
+    }
+
+    public Set<SaltedHash> getSaltedHashes(@NotNull final byte[] cleartextBytes, int count) {
+        if (!destroyed) {
+            final Iterator<SaltedHash> iter = new SaltedHashIterator(cleartextBytes);
+            return StreamUtils.createStreamFromIterator(iter)
+                    .limit(count)
+                    .collect(toSet());
+        }
+        else {
+            throw new IllegalStateException(
+                    "Unable to create salted hashes -- Secret seed has been cleared with destroy()."
             );
         }
     }

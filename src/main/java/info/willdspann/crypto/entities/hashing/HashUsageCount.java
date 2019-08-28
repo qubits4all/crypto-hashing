@@ -32,15 +32,31 @@ public class HashUsageCount {
         return usedHash;
     }
 
+    public void setUsedHash(String usedHash) {
+        this.usedHash = usedHash;
+    }
+
     public int getUsageCount() {
         return usageCount;
+    }
+
+    public void setUsageCount(int usageCount) {
+        this.usageCount = usageCount;
     }
 
     public Timestamp getCreatedAt() {
         return createdAt;
     }
 
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public Timestamp getLastUpdatedAt() {
         return lastUpdatedAt;
+    }
+
+    public void setLastUpdatedAt(Timestamp lastUpdatedAt) {
+        this.lastUpdatedAt = lastUpdatedAt;
     }
 }

@@ -29,7 +29,15 @@ public class UsedDistinctHash {
         return usedHash;
     }
 
+    public void setUsedHash(String usedHash) {
+        this.usedHash = usedHash;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
