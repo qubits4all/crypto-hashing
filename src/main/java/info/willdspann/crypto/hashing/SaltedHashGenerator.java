@@ -16,6 +16,11 @@ import info.willdspann.crypto.valueobjects.SaltedHash;
 
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * This salted hash generator creates a reproducible yet unpredictable sequence of seed values associated to a given
+ * cleartext value. It uses an associated seed generator to seed a Deterministic Random Bit Generator (DRBG), which is
+ * used to produce the sequence of associated salt values each of which is used to produce a salted (SHA-256) hash.
+ */
 public class SaltedHashGenerator implements Destroyable {
     private final byte[] secretSeed;
     private boolean destroyed = false;

@@ -16,6 +16,13 @@ import org.springframework.lang.Nullable;
 
 import static info.willdspann.crypto.hashing.ReproducibleSeedGenerator.NULL_STRING_MARKER;
 
+/**
+ * Utility class that supports generating a reproducible yet unpredictable sequence of salt values associated with a
+ * given cleartext value and secret seed.
+ *
+ * @see ReproducibleSeedGenerator
+ * @see SaltedHashGenerator
+ */
 public final class ReproducibleSaltGenerator {
     private static final String DRBG_ALGORITHM = "DRBG";
     private static final int DEFAULT_SALT_LENGTH = 16;     // bytes
