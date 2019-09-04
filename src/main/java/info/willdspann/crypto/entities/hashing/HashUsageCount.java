@@ -8,6 +8,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * JPA entity for entries in a DB table that keeps track of the number of used salted hashes for a given cleartext
+ * value, indexed by its unsalted hash.
+ */
 @Entity
 @Table(name = "secure_hashing.hash_usage_counts")
 public class HashUsageCount {

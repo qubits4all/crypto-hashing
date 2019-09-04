@@ -8,6 +8,9 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * JPA entity for entries in a DB table that keeps track of used salted hashes.
+ */
 @Entity
 @Table(name = "secure_hashing.used_distinct_hashes")
 public class UsedDistinctHash {
