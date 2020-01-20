@@ -1,10 +1,7 @@
 package info.willdspann.crypto.hashing;
 
 import java.nio.charset.StandardCharsets;
-import java.security.DrbgParameters;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +10,10 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.prng.SP800SecureRandomBuilder;
+
 import org.springframework.lang.Nullable;
 
 import static info.willdspann.crypto.hashing.ReproducibleSeedGenerator.NULL_STRING_MARKER;
@@ -127,20 +128,7 @@ public final class ReproducibleSaltGenerator {
     }
 
     private static SecureRandom initDRBG() {
-        SecureRandom drbg;
-        try {
-            Security.setProperty("securerandom.drbg.config", "Hash_DRBG,SHA-256,256,none");
-            drbg = SecureRandom.getInstance("DRBG",
-                    DrbgParameters.instantiation(
-                            DRBG_SECURITY_STRENGTH,
-                            DrbgParameters.Capability.NONE,
-                            null)
-            );
-        } catch (NoSuchAlgorithmException nsae) {
-            throw new IllegalStateException(String.format("Unable to instantiate SecureRandom with the following PRNG" +
-                    " algorithm: %s", DRBG_ALGORITHM));
-        }
-        return drbg;
+        return new SP800SecureRandomBuilder().buildHash(new SHA256Digest(), null, false);
     }
 
 
