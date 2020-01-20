@@ -22,6 +22,8 @@ import static java.util.stream.Collectors.toSet;
  * used to produce the sequence of associated salt values each of which is used to produce a salted (SHA-256) hash.
  */
 public class SaltedHashGenerator implements Destroyable {
+    static final int DEFAULT_SEED_LEN = 64;  // bytes
+
     private final byte[] secretSeed;
     private boolean destroyed = false;
 

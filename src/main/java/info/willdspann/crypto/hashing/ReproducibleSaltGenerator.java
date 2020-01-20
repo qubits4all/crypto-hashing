@@ -24,8 +24,8 @@ import static info.willdspann.crypto.hashing.ReproducibleSeedGenerator.NULL_STRI
  * @see SaltedHashGenerator
  */
 public final class ReproducibleSaltGenerator {
+    static final int DEFAULT_SALT_LENGTH = 16;     // bytes
     private static final String DRBG_ALGORITHM = "DRBG";
-    private static final int DEFAULT_SALT_LENGTH = 16;     // bytes
     private static final int DRBG_SECURITY_STRENGTH = 128; // highest security strength (should be >= the largest random value requested at a time)
 
     private ReproducibleSaltGenerator() { }
@@ -128,6 +128,7 @@ public final class ReproducibleSaltGenerator {
     private static SecureRandom initDRBG() {
         SecureRandom drbg;
         try {
+            Security.setProperty("securerandom.drbg.config", "Hash_DRBG,SHA-256,256,none");
             drbg = SecureRandom.getInstance("DRBG",
                     DrbgParameters.instantiation(
                             DRBG_SECURITY_STRENGTH,

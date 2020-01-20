@@ -1,6 +1,7 @@
 package info.willdspann.crypto.valueobjects;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 
@@ -61,6 +62,25 @@ public final class SaltedHash {
 
     public CryptoHashAlgorithm getHashAlgorithm() {
         return hashAlgorithm;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(hashAlgorithm);
+        result = 31 * result + Arrays.hashCode(hash);
+        result = 31 * result + Arrays.hashCode(salt);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj instanceof SaltedHash) {
+            SaltedHash that = (SaltedHash) obj;
+            return Arrays.equals(this.hash, that.hash) && Arrays.equals(this.salt, that.salt);
+        }
+        return false;
     }
 
     @Override
