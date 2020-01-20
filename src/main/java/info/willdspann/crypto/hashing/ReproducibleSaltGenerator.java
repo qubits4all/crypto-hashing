@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.DrbgParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +27,7 @@ import static info.willdspann.crypto.hashing.ReproducibleSeedGenerator.NULL_STRI
 public final class ReproducibleSaltGenerator {
     static final int DEFAULT_SALT_LENGTH = 16;     // bytes
     private static final String DRBG_ALGORITHM = "DRBG";
-    private static final int DRBG_SECURITY_STRENGTH = 128; // highest security strength (should be >= the largest random value requested at a time)
+    private static final int DRBG_SECURITY_STRENGTH = 256; // highest security strength (should be >= the largest random value requested at a time)
 
     private ReproducibleSaltGenerator() { }
 
