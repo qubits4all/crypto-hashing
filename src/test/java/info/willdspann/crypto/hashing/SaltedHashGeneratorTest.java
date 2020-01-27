@@ -4,17 +4,22 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.data.util.StreamUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import info.willdspann.crypto.util.hashing.HashingUtils;
 import info.willdspann.crypto.valueobjects.SaltedHash;
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,6 +56,36 @@ public class SaltedHashGeneratorTest {
 
         final SaltedHashGenerator hashGen2 = new SaltedHashGenerator(Arrays.copyOf(this.secureSeed, secureSeed.length));
         final SaltedHash reproducedSaltedHash = hashGen2.getNthSaltedHash(providedStringBytes, 0);
+
+        assertThat(reproducedSaltedHash.getSaltedHash().length, is(HASH_LEN));
+        assertThat(reproducedSaltedHash.getSalt().length, is(SALT_LEN));
         assertThat(reproducedSaltedHash, equalTo(saltedHash));
+    }
+
+    @Test
+    public void streamOfSaltedHashesIsReproducible() {
+        final SaltedHashGenerator hashGen1 = new SaltedHashGenerator(Arrays.copyOf(this.secureSeed, secureSeed.length));
+        final byte[] providedStringBytes = "spamandeggs".getBytes(StandardCharsets.UTF_8);
+
+        final Iterator<SaltedHash> hashIter = hashGen1.saltedHashIterator(providedStringBytes);
+        final List<SaltedHash> saltedHashes = StreamUtils.createStreamFromIterator(hashIter)
+                .limit(3)
+                .peek( saltedHash -> {
+                    assertThat(saltedHash.getSaltedHash().length, is(HASH_LEN));
+                    assertThat(saltedHash.getSalt().length, is(SALT_LEN));
+                })
+                .collect(toList());
+
+        final SaltedHashGenerator reproducedHashGen = new SaltedHashGenerator(Arrays.copyOf(this.secureSeed, secureSeed.length));
+        final Iterator<SaltedHash> reproducedHashIter = reproducedHashGen.saltedHashIterator(providedStringBytes);
+        final List<SaltedHash> reproducedSaltedHashes = StreamUtils.createStreamFromIterator(reproducedHashIter)
+                .limit(3)
+                .peek( saltedHash -> {
+                    assertThat(saltedHash.getSaltedHash().length, is(HASH_LEN));
+                    assertThat(saltedHash.getSalt().length, is(SALT_LEN));
+                })
+                .collect(toList());
+
+        assertThat(reproducedSaltedHashes, equalTo(saltedHashes));
     }
 }
