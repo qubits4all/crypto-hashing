@@ -6,11 +6,15 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+//import org.springframework.data.util.StreamUtils;
 
 import org.springframework.data.util.StreamUtils;
 import org.testng.annotations.BeforeClass;
@@ -68,7 +72,7 @@ public class SaltedHashGeneratorTest {
         final byte[] providedStringBytes = "spamandeggs".getBytes(StandardCharsets.UTF_8);
 
         final Iterator<SaltedHash> hashIter = hashGen1.saltedHashIterator(providedStringBytes);
-        final List<SaltedHash> saltedHashes = StreamUtils.createStreamFromIterator(hashIter)
+        final List<SaltedHash> saltedHashes = streamFromIterator(hashIter)
                 .limit(3)
                 .peek( saltedHash -> {
                     assertThat(saltedHash.getSaltedHash().length, is(HASH_LEN));
@@ -78,7 +82,7 @@ public class SaltedHashGeneratorTest {
 
         final SaltedHashGenerator reproducedHashGen = new SaltedHashGenerator(Arrays.copyOf(this.secureSeed, secureSeed.length));
         final Iterator<SaltedHash> reproducedHashIter = reproducedHashGen.saltedHashIterator(providedStringBytes);
-        final List<SaltedHash> reproducedSaltedHashes = StreamUtils.createStreamFromIterator(reproducedHashIter)
+        final List<SaltedHash> reproducedSaltedHashes = streamFromIterator(reproducedHashIter)
                 .limit(3)
                 .peek( saltedHash -> {
                     assertThat(saltedHash.getSaltedHash().length, is(HASH_LEN));
@@ -87,5 +91,11 @@ public class SaltedHashGeneratorTest {
                 .collect(toList());
 
         assertThat(reproducedSaltedHashes, equalTo(saltedHashes));
+    }
+
+    private <T> Stream<T> streamFromIterator(Iterator<T> iterator) {
+        return StreamSupport.stream(
+                Spliterators.spliterator(iterator, Integer.MAX_VALUE, Spliterator.ORDERED),
+                false);
     }
 }
