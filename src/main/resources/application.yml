@@ -1,0 +1,3 @@
+# DRBG mechanism, DRBG algorithm, highest security strength & DrbgParametrs.Capability (NONE, RESEED_ONLY or PR_AND_RESEED)
+securerandom.drbg.config: Hash_DRBG,SHA-256,256,none
+#securerandom.drbg.config: Hash_DRBG,SHA-1,112,none  # Default DRBG configuration
