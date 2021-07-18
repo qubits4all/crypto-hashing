@@ -6,15 +6,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.prng.SP800SecureRandomBuilder;
-
-import org.springframework.lang.Nullable;
+import org.bouncycastle.crypto.prng.BasicEntropySourceProvider;
+import org.bouncycastle.crypto.prng.EntropySourceProvider;
+import org.bouncycastle.crypto.prng.FixedSecureRandom;
+import org.bouncycastle.crypto.prng.drbg.HashSP800DRBG;
+import org.bouncycastle.crypto.prng.drbg.SP80090DRBG;
 
 import static info.willdspann.crypto.hashing.ReproducibleSeedGenerator.NULL_STRING_MARKER;
 
@@ -104,16 +107,15 @@ public final class ReproducibleSaltGenerator {
         return salts;
     }
 
-    public static Iterator<byte[]> iteratorForValue(@NotNull final byte[] associatedBytes, @NotNull final byte[] secretSeedBytes) {
-        final SecureRandom drbg = initDRBG();
+    public static Iterator<byte[]> iteratorForValue(@NotNull final byte[] associatedBytes,
+                                                    @NotNull final byte[] secretSeedBytes
+    ) {
         final byte[] associatedSeed = ReproducibleSeedGenerator.generateSeedForValue(associatedBytes, secretSeedBytes);
 
-        return new SaltIterator(drbg, associatedSeed);
+        return new SaltIterator(associatedSeed);
     }
 
     public static Iterator<String> iteratorForValue(@Nullable final String associatedValue, @NotNull final String secretSeedHex) throws DecoderException {
-        final SecureRandom drbg = initDRBG();
-
         byte[] associatedBytes;
         if (associatedValue != null) {
             associatedBytes = associatedValue.getBytes(StandardCharsets.UTF_8);
@@ -124,19 +126,35 @@ public final class ReproducibleSaltGenerator {
         final byte[] secretSeedBytes = Hex.decodeHex(secretSeedHex);
         final byte[] associatedSeed = ReproducibleSeedGenerator.generateSeedForValue(associatedBytes, secretSeedBytes);
 
-        return new HexSaltIterator(drbg, associatedSeed);
+        return new HexSaltIterator(associatedSeed);
     }
 
-    private static SecureRandom initDRBG() {
-        return new SP800SecureRandomBuilder().buildHash(new SHA256Digest(), null, false);
+    /**
+     * Creates a Deterministic Random Bit Generator (DRBG), used to generate a reproducible yet unpredictable sequence
+     * of salt values, from the given starting seed value.
+     *
+     * @param seedBytes
+     * @return
+     */
+    private static SP80090DRBG initDRBG(byte[] seedBytes) {
+        final SecureRandom preSeededFixedPRNG = new FixedSecureRandom(true, seedBytes);
+        final EntropySourceProvider seedSource = new BasicEntropySourceProvider(preSeededFixedPRNG, false);
+
+        return new HashSP800DRBG(
+                new SHA256Digest(),
+                DRBG_SECURITY_STRENGTH,
+                seedSource.get(DRBG_SECURITY_STRENGTH),
+                null,
+                null
+        );
     }
 
 
     private static class HexSaltIterator implements Iterator<String> {
         private SaltIterator iter;
 
-        private HexSaltIterator(@NotNull final SecureRandom drbg, @NotNull final byte[] associatedSeed) {
-            this.iter = new SaltIterator(drbg, associatedSeed);
+        private HexSaltIterator(@NotNull final byte[] associatedSeed) {
+            this.iter = new SaltIterator(associatedSeed);
         }
 
         private HexSaltIterator(@NotNull final SaltIterator saltIterator) {
@@ -160,20 +178,17 @@ public final class ReproducibleSaltGenerator {
      * data value.
      */
     private static class SaltIterator implements Iterator<byte[]> {
-        private SecureRandom drbg;
+        private SP80090DRBG drbg;
 
         /**
          * Construct a salt iterator given a DRBG and an associated data value's associated seed.
          *
-         * @param drbg a Deterministic Random Bit Generator (DRBG) used to generate a reproducible yet unpredictable
-         *             sequence of salt values, from the given starting seed value.
          * @param associatedSeed seed value from which to initialize the DRBG, generated via
          *                       {@code ReproducibleSeedGenerator} from a common secret seed and the associated data
          *                       value for which salts will be generated.
          */
-        private SaltIterator(@NotNull final SecureRandom drbg, @NotNull final byte[] associatedSeed) {
-            this.drbg = drbg;
-            this.drbg.setSeed(associatedSeed);
+        private SaltIterator(@NotNull final byte[] associatedSeed) {
+            this.drbg = initDRBG(associatedSeed);
         }
 
         @Override
@@ -184,7 +199,7 @@ public final class ReproducibleSaltGenerator {
         @Override
         public byte[] next() {
             final byte[] nextSalt = new byte[DEFAULT_SALT_LENGTH];
-            drbg.nextBytes(nextSalt);
+            drbg.generate(nextSalt, null, false);
 
             return nextSalt;
         }
