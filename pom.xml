@@ -16,7 +16,7 @@
         <org.apache.commons.codec.version>1.12</org.apache.commons.codec.version>
         <org.apache.commons.crypto.version>1.0.0</org.apache.commons.crypto.version>
         <org.hibernate.version>3.5.6-Final</org.hibernate.version>
-        <org.springframework.spring-data-jpa.version>2.1.10.RELEASE</org.springframework.spring-data-jpa.version>
+        <org.springframework.spring-data-jpa.version>2.7.2</org.springframework.spring-data-jpa.version>
 
         <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
