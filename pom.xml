@@ -13,7 +13,7 @@
 
         <javax.validation.version>2.0.1.Final</javax.validation.version>
         <findbugs.jsr-305.version>3.0.2</findbugs.jsr-305.version>
-        <org.apache.commons.codec.version>1.12</org.apache.commons.codec.version>
+        <org.apache.commons.codec.version>1.15</org.apache.commons.codec.version>
         <org.apache.commons.crypto.version>1.0.0</org.apache.commons.crypto.version>
         <org.hibernate.version>3.5.6-Final</org.hibernate.version>
         <org.springframework.spring-data-jpa.version>2.1.10.RELEASE</org.springframework.spring-data-jpa.version>
